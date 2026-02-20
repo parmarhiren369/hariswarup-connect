@@ -1,20 +1,19 @@
 import { useNavigate } from "react-router-dom";
-import { Sun, Shield, UserPlus } from "lucide-react";
+import { Shield, UserPlus } from "lucide-react";
+import logo from "@/assets/logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen gradient-warm flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
-      <header className="gradient-maroon text-primary-foreground py-8 px-6 text-center">
+      <header className="gradient-saffron text-primary-foreground py-10 px-6 text-center">
         <div className="animate-fade-in">
-          <div className="w-20 h-20 mx-auto mb-4 rounded-full gradient-saffron flex items-center justify-center shadow-warm">
-            <Sun className="w-10 h-10 text-primary-foreground" />
-          </div>
+          <img src={logo} alt="હરિપ્રબોધમ્ Logo" className="w-24 h-24 mx-auto mb-4 drop-shadow-lg" />
           <h1 className="text-3xl md:text-4xl font-extrabold tracking-wide">હરિસ્વરૂપ પ્રદેશ</h1>
-          <p className="text-primary-foreground/70 mt-2 text-lg">સત્સંગ એપ</p>
-          <div className="w-24 h-1 gradient-saffron mx-auto mt-4 rounded-full" />
+          <p className="text-primary-foreground/80 mt-2 text-lg">સત્સંગ એપ</p>
+          <div className="w-24 h-1 bg-primary-foreground/40 mx-auto mt-4 rounded-full" />
         </div>
       </header>
 
@@ -36,9 +35,9 @@ const Index = () => {
           {/* Admin Portal */}
           <button
             onClick={() => navigate("/admin")}
-            className="group bg-card rounded-2xl shadow-card border border-border p-8 text-center hover:shadow-warm hover:border-maroon/30 transition-all duration-300 hover:-translate-y-1"
+            className="group bg-card rounded-2xl shadow-card border border-border p-8 text-center hover:shadow-warm hover:border-primary/30 transition-all duration-300 hover:-translate-y-1"
           >
-            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-maroon flex items-center justify-center shadow-warm group-hover:scale-110 transition-transform duration-300">
+            <div className="w-16 h-16 mx-auto mb-4 rounded-2xl gradient-saffron flex items-center justify-center shadow-warm group-hover:scale-110 transition-transform duration-300">
               <Shield className="w-8 h-8 text-primary-foreground" />
             </div>
             <h2 className="text-xl font-bold text-foreground mb-2">એડમિન પેનલ</h2>

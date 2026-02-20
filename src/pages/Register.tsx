@@ -109,7 +109,7 @@ const RegistrationForm = () => {
   );
 
   return (
-    <div className="min-h-screen gradient-warm">
+    <div className="min-h-screen bg-background">
       <AppHeader subtitle="સભ્ય નોંધણી" showBack onBack={() => navigate("/")} />
 
       <main className="max-w-2xl mx-auto px-4 py-8 animate-fade-in">
