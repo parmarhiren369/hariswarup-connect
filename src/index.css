@@ -6,52 +6,52 @@
 
 @layer base {
   :root {
-    --background: 35 30% 97%;
-    --foreground: 15 40% 12%;
+    --background: 0 0% 100%;
+    --foreground: 15 30% 15%;
 
-    --card: 35 40% 99%;
-    --card-foreground: 15 40% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 15 30% 15%;
 
-    --popover: 35 40% 99%;
-    --popover-foreground: 15 40% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 15 30% 15%;
 
-    --primary: 24 85% 48%;
-    --primary-foreground: 40 100% 98%;
+    --primary: 24 90% 50%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 35 45% 92%;
-    --secondary-foreground: 15 40% 18%;
+    --secondary: 30 60% 95%;
+    --secondary-foreground: 15 30% 18%;
 
-    --muted: 35 25% 93%;
-    --muted-foreground: 15 15% 45%;
+    --muted: 30 20% 95%;
+    --muted-foreground: 15 10% 45%;
 
-    --accent: 45 90% 55%;
-    --accent-foreground: 15 40% 12%;
+    --accent: 24 80% 55%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 30 25% 88%;
-    --input: 30 25% 88%;
-    --ring: 24 85% 48%;
+    --border: 30 30% 90%;
+    --input: 30 30% 90%;
+    --ring: 24 90% 50%;
 
     --radius: 0.75rem;
 
-    --sidebar-background: 15 30% 15%;
-    --sidebar-foreground: 35 30% 92%;
-    --sidebar-primary: 24 85% 55%;
-    --sidebar-primary-foreground: 40 100% 98%;
-    --sidebar-accent: 15 25% 22%;
-    --sidebar-accent-foreground: 35 30% 92%;
-    --sidebar-border: 15 20% 25%;
-    --sidebar-ring: 24 85% 48%;
+    --sidebar-background: 24 85% 45%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-primary: 0 0% 100%;
+    --sidebar-primary-foreground: 24 90% 50%;
+    --sidebar-accent: 24 75% 40%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 24 70% 42%;
+    --sidebar-ring: 0 0% 100%;
 
     --maroon: 350 65% 28%;
-    --maroon-foreground: 40 100% 98%;
+    --maroon-foreground: 0 0% 100%;
     --gold: 42 80% 55%;
-    --gold-foreground: 15 40% 12%;
-    --saffron: 24 85% 48%;
-    --saffron-light: 30 70% 92%;
-    --cream: 40 50% 96%;
+    --gold-foreground: 15 30% 15%;
+    --saffron: 24 90% 50%;
+    --saffron-light: 30 80% 96%;
+    --cream: 40 50% 98%;
   }
 
   .dark {
@@ -89,13 +89,13 @@
 
 @layer utilities {
   .gradient-saffron {
-    background: linear-gradient(135deg, hsl(24, 85%, 48%), hsl(35, 90%, 55%));
+    background: linear-gradient(135deg, hsl(24, 90%, 50%), hsl(30, 85%, 55%));
   }
   .gradient-maroon {
-    background: linear-gradient(135deg, hsl(350, 65%, 28%), hsl(15, 50%, 22%));
+    background: linear-gradient(135deg, hsl(24, 90%, 50%), hsl(24, 85%, 42%));
   }
   .gradient-warm {
-    background: linear-gradient(180deg, hsl(35, 40%, 97%), hsl(40, 50%, 94%));
+    background: linear-gradient(180deg, hsl(0, 0%, 100%), hsl(30, 60%, 97%));
   }
   .shadow-warm {
     box-shadow: 0 4px 20px -4px hsl(24 85% 48% / 0.15);

@@ -69,7 +69,7 @@ const AdminDashboard = () => {
   );
 
   return (
-    <div className="min-h-screen gradient-warm">
+    <div className="min-h-screen bg-background">
       <AppHeader subtitle="એડમિન ડેશબોર્ડ" showBack onBack={() => navigate("/")} />
 
       <main className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
@@ -85,7 +85,7 @@ const AdminDashboard = () => {
             </div>
           </div>
           <div className="bg-card rounded-xl shadow-card border border-border p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl gradient-maroon flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl gradient-saffron flex items-center justify-center">
               <Users className="w-6 h-6 text-primary-foreground" />
             </div>
             <div>
