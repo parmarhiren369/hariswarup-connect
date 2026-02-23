@@ -28,11 +28,7 @@ const RegistrationForm = () => {
     occupation: "",
     mobile: "",
     whatsapp: "",
-    city: "",
-    pinCode: "",
-    isAmbarish: "",
-    memberType: "",
-    category: "",
+    area: "",
   });
 
   const [subMembers, setSubMembers] = useState<SubMember[]>([]);
@@ -64,8 +60,7 @@ const RegistrationForm = () => {
 
     const required = [
       "fullName", "fatherName", "surname", "birthDate",
-      "maritalStatus", "occupation", "mobile", "isAmbarish",
-      "memberType", "category",
+      "maritalStatus", "occupation", "mobile",
     ];
     for (const field of required) {
       if (!form[field as keyof typeof form]) {
@@ -85,11 +80,6 @@ const RegistrationForm = () => {
 
     const reg: MemberRegistration = {
       ...form,
-      bloodGroup: "",
-      address: "",
-      pujaRegular: "",
-      sabhaRegular: "",
-      dashmoVisamo: "",
       id: crypto.randomUUID(),
       registeredAt: new Date().toISOString(),
       subMembers: validSubMembers.length > 0 ? validSubMembers : undefined,
@@ -100,7 +90,7 @@ const RegistrationForm = () => {
     setForm({
       fullName: "", fatherName: "", surname: "", birthDate: "",
       maritalStatus: "", occupation: "", mobile: "", whatsapp: "",
-      city: "", pinCode: "", isAmbarish: "", memberType: "", category: "",
+      area: "",
     });
     setSubMembers([]);
   };
@@ -197,54 +187,19 @@ const RegistrationForm = () => {
               </div>
             </div>
 
-            {/* Address - only city & pin */}
+            {/* Address */}
             <SectionTitle icon={MapPin} title="સરનામું" />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">શહેર</Label>
-                <Select value={form.city} onValueChange={(v) => updateField("city", v)}>
-                  <SelectTrigger><SelectValue placeholder="શહેર પસંદ કરો" /></SelectTrigger>
-                  <SelectContent>
-                    {CITY_OPTIONS.map((city) => (
-                      <SelectItem key={city} value={city}>{city}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-medium">પિન કોડ</Label>
-                <Input value={form.pinCode} onChange={(e) => updateField("pinCode", e.target.value.replace(/\D/g, "").slice(0, 6))} placeholder="પિન કોડ" />
-              </div>
-            </div>
-
-            {/* Membership */}
-            <SectionTitle icon={Heart} title="સભ્યતા વિગતો" />
-
-            <div className="space-y-4">
-              <div className="space-y-1.5">
-                <RequiredLabel>અંબરીશ છો?</RequiredLabel>
-                <RadioGroup value={form.isAmbarish} onValueChange={(v) => updateField("isAmbarish", v)} className="flex gap-6">
-                  <RadioOption name="ambarish" value="હા" label="હા" />
-                  <RadioOption name="ambarish" value="ના" label="ના" />
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-1.5">
-                <RequiredLabel>સભ્ય પ્રકાર</RequiredLabel>
-                <RadioGroup value={form.memberType} onValueChange={(v) => updateField("memberType", v)} className="flex gap-6">
-                  <RadioOption name="memberType" value="નવા" label="નવા" />
-                  <RadioOption name="memberType" value="જૂના" label="જૂના" />
-                </RadioGroup>
-              </div>
-
-              <div className="space-y-1.5">
-                <RequiredLabel>શ્રેણી</RequiredLabel>
-                <RadioGroup value={form.category} onValueChange={(v) => updateField("category", v)} className="flex gap-6">
-                  <RadioOption name="category" value="કાર્યકર્તા" label="કાર્યકર્તા" />
-                  <RadioOption name="category" value="યુવક" label="યુવક" />
-                </RadioGroup>
-              </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium">વિસ્તાર</Label>
+              <Select value={form.area} onValueChange={(v) => updateField("area", v)}>
+                <SelectTrigger><SelectValue placeholder="વિસ્તાર પસંદ કરો" /></SelectTrigger>
+                <SelectContent>
+                  {CITY_OPTIONS.map((area) => (
+                    <SelectItem key={area} value={area}>{area}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Sub Members */}
