@@ -11,20 +11,11 @@ export interface MemberRegistration {
   fatherName: string;
   surname: string;
   birthDate: string;
-  bloodGroup: string;
   maritalStatus: string;
   occupation: string;
   mobile: string;
   whatsapp: string;
-  address: string;
-  city: string;
-  pinCode: string;
-  isAmbarish: string;
-  memberType: string;
-  category: string;
-  pujaRegular: string;
-  sabhaRegular: string;
-  dashmoVisamo: string;
+  area: string;
   registeredAt: string;
   subMembers?: SubMember[];
 }

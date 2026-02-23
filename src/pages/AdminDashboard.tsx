@@ -25,7 +25,7 @@ const AdminDashboard = () => {
   }, []);
 
   const filtered = registrations.filter((r) =>
-    `${r.fullName} ${r.fatherName} ${r.surname} ${r.mobile} ${r.city}`.toLowerCase().includes(search.toLowerCase())
+    `${r.fullName} ${r.fatherName} ${r.surname} ${r.mobile} ${r.area}`.toLowerCase().includes(search.toLowerCase())
   );
 
   const handleDelete = (id: string) => {
@@ -42,13 +42,12 @@ const AdminDashboard = () => {
     const headers = [
       "પૂરું નામ", "ફાધર નામ", "સરનેમ", "જન્મ તારીખ",
       "વૈવાહિક સ્થિતિ", "વ્યવસાય", "મોબાઈલ", "વોટ્સએપ",
-      "શહેર", "પિન કોડ", "અંબરીશ", "સભ્ય પ્રકાર", "શ્રેણી",
-      "નોંધણી તારીખ", "વધારાના સભ્યો"
+      "વિસ્તાર", "નોંધણી તારીખ", "વધારાના સભ્યો"
     ];
     const rows = registrations.map((r) => [
       r.fullName, r.fatherName, r.surname, r.birthDate,
       r.maritalStatus, r.occupation, r.mobile, r.whatsapp,
-      r.city, r.pinCode, r.isAmbarish, r.memberType, r.category,
+      r.area,
       r.registeredAt,
       r.subMembers ? r.subMembers.map((s) => `${s.name}(${s.contact})`).join("; ") : "",
     ]);
@@ -102,7 +101,7 @@ const AdminDashboard = () => {
 
       <main className="max-w-6xl mx-auto px-4 py-8 animate-fade-in">
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
           <div className="bg-card rounded-xl shadow-card border border-border p-5 flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl gradient-saffron flex items-center justify-center">
               <Users className="w-6 h-6 text-primary-foreground" />
@@ -110,28 +109,6 @@ const AdminDashboard = () => {
             <div>
               <p className="text-2xl font-bold text-foreground">{registrations.length}</p>
               <p className="text-sm text-muted-foreground">કુલ સભ્યો</p>
-            </div>
-          </div>
-          <div className="bg-card rounded-xl shadow-card border border-border p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl gradient-saffron flex items-center justify-center">
-              <Users className="w-6 h-6 text-primary-foreground" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {registrations.filter((r) => r.isAmbarish === "હા").length}
-              </p>
-              <p className="text-sm text-muted-foreground">અંબરીશ</p>
-            </div>
-          </div>
-          <div className="bg-card rounded-xl shadow-card border border-border p-5 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-xl bg-accent flex items-center justify-center">
-              <Users className="w-6 h-6 text-accent-foreground" />
-            </div>
-            <div>
-              <p className="text-2xl font-bold text-foreground">
-                {registrations.filter((r) => r.memberType === "નવા").length}
-              </p>
-              <p className="text-sm text-muted-foreground">નવા સભ્યો</p>
             </div>
           </div>
           <div className="bg-card rounded-xl shadow-card border border-border p-5 flex items-center gap-4">
@@ -174,8 +151,7 @@ const AdminDashboard = () => {
                     <TableHead className="text-foreground font-semibold">પૂરું નામ</TableHead>
                     <TableHead className="text-foreground font-semibold">સરનેમ</TableHead>
                     <TableHead className="text-foreground font-semibold">મોબાઈલ</TableHead>
-                    <TableHead className="text-foreground font-semibold">શહેર</TableHead>
-                    <TableHead className="text-foreground font-semibold">શ્રેણી</TableHead>
+                     <TableHead className="text-foreground font-semibold">વિસ્તાર</TableHead>
                     <TableHead className="text-foreground font-semibold">સબ-સભ્યો</TableHead>
                     <TableHead className="text-foreground font-semibold text-right">ક્રિયાઓ</TableHead>
                   </TableRow>
@@ -187,8 +163,7 @@ const AdminDashboard = () => {
                       <TableCell className="font-medium">{r.fullName}</TableCell>
                       <TableCell>{r.surname}</TableCell>
                       <TableCell>{r.mobile}</TableCell>
-                      <TableCell>{r.city || "—"}</TableCell>
-                      <TableCell>{r.category}</TableCell>
+                      <TableCell>{r.area || "—"}</TableCell>
                       <TableCell>
                         {r.subMembers && r.subMembers.length > 0 ? (
                           <Button variant="link" size="sm" className="text-primary p-0 h-auto" onClick={() => setShowSubMembers(r)}>
@@ -218,11 +193,7 @@ const AdminDashboard = () => {
                                   <DetailRow label="વ્યવસાય" value={selected.occupation} />
                                   <DetailRow label="મોબાઈલ" value={selected.mobile} />
                                   <DetailRow label="વોટ્સએપ" value={selected.whatsapp} />
-                                  <DetailRow label="શહેર" value={selected.city} />
-                                  <DetailRow label="પિન કોડ" value={selected.pinCode} />
-                                  <DetailRow label="અંબરીશ" value={selected.isAmbarish} />
-                                  <DetailRow label="સભ્ય પ્રકાર" value={selected.memberType} />
-                                  <DetailRow label="શ્રેણી" value={selected.category} />
+                                  <DetailRow label="વિસ્તાર" value={selected.area} />
                                 </div>
                               )}
                             </DialogContent>
