@@ -1,3 +1,10 @@
+export interface SubMember {
+  name: string;
+  contact: string;
+  area: string;
+  profession: string;
+}
+
 export interface MemberRegistration {
   id: string;
   fullName: string;
@@ -19,6 +26,7 @@ export interface MemberRegistration {
   sabhaRegular: string;
   dashmoVisamo: string;
   registeredAt: string;
+  subMembers?: SubMember[];
 }
 
 export const CITY_OPTIONS = [
