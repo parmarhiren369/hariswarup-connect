@@ -1,5 +1,7 @@
 import { useState } from "react";
+import { Navigate } from "react-router-dom";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
+import { useAuth } from "@/contexts/AuthContext";
 import { auth } from "@/lib/firebase";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,10 +11,24 @@ import logo from "@/assets/logo.png";
 import { LogIn, UserPlus } from "lucide-react";
 
 const Auth = () => {
+  const { user, loading } = useAuth();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (user) {
+    return <Navigate to="/" replace />;
+  }
+  
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,7 +41,7 @@ const Auth = () => {
       return;
     }
 
-    setLoading(true);
+    setSubmitting(true);
     try {
       if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
@@ -48,7 +64,7 @@ const Auth = () => {
         toast.error("કંઈક ખોટું થયું, ફરી પ્રયાસ કરો");
       }
     } finally {
-      setLoading(false);
+      setSubmitting(false);
     }
   };
 
@@ -102,10 +118,10 @@ const Auth = () => {
 
               <Button
                 type="submit"
-                disabled={loading}
+                disabled={submitting}
                 className="w-full gradient-saffron text-primary-foreground hover:opacity-90 transition-opacity h-12 text-lg font-semibold rounded-xl shadow-warm"
               >
-                {loading ? "રાહ જુઓ..." : isLogin ? "લોગિન કરો" : "સાઇન અપ કરો"}
+                {submitting ? "રાહ જુઓ..." : isLogin ? "લોગિન કરો" : "સાઇન અપ કરો"}
               </Button>
             </form>
 
