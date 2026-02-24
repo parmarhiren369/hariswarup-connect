@@ -1,10 +1,17 @@
 import { useNavigate } from "react-router-dom";
-import { Shield, UserPlus } from "lucide-react";
+import { Shield, UserPlus, LogOut } from "lucide-react";
+import { auth } from "@/lib/firebase";
+import { signOut } from "firebase/auth";
+import { toast } from "sonner";
 import logo from "@/assets/logo.png";
 
 const Index = () => {
   const navigate = useNavigate();
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    toast.success("લોગઆઉટ સફળ! 🙏");
+  };
   return (
     <div className="min-h-screen bg-background flex flex-col">
       {/* Header */}
@@ -47,8 +54,15 @@ const Index = () => {
       </main>
 
       {/* Footer */}
-      <footer className="text-center py-4 text-xs text-muted-foreground">
-        જય સ્વામિનારાયણ 🙏 | હરિસ્વરૂપ પ્રદેશ
+      <footer className="text-center py-4 px-4">
+        <button
+          onClick={handleLogout}
+          className="inline-flex items-center gap-2 text-sm text-muted-foreground hover:text-destructive transition-colors mb-2"
+        >
+          <LogOut className="w-4 h-4" />
+          લોગઆઉટ
+        </button>
+        <p className="text-xs text-muted-foreground">જય સ્વામિનારાયણ 🙏 | હરિસ્વરૂપ પ્રદેશ</p>
       </footer>
     </div>
   );
