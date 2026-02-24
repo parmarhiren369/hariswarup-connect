@@ -11,7 +11,10 @@ import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Search, Trash2, Eye, Users, Download, UserPlus } from "lucide-react";
+import { Search, Trash2, Eye, Users, Download, UserPlus, Shield } from "lucide-react";
+
+const ADMIN_ID = "suchetan swami";
+const ADMIN_PASS = "suchetanswami369";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
@@ -19,10 +22,57 @@ const AdminDashboard = () => {
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<MemberRegistration | null>(null);
   const [showSubMembers, setShowSubMembers] = useState<MemberRegistration | null>(null);
+  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminId, setAdminId] = useState("");
+  const [adminPass, setAdminPass] = useState("");
 
   useEffect(() => {
-    setRegistrations(getRegistrations());
-  }, []);
+    if (adminAuth) setRegistrations(getRegistrations());
+  }, [adminAuth]);
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (adminId.trim().toLowerCase() === ADMIN_ID && adminPass === ADMIN_PASS) {
+      setAdminAuth(true);
+      toast.success("એડમિન લોગિન સફળ! 🙏");
+    } else {
+      toast.error("ખોટો ID અથવા પાસવર્ડ");
+    }
+  };
+
+  if (!adminAuth) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col">
+        <AppHeader title="એડમિન લોગિન" onBack={() => navigate("/")} />
+        <main className="flex-1 flex items-center justify-center px-4 py-12">
+          <div className="w-full max-w-sm animate-slide-up">
+            <div className="bg-card rounded-xl shadow-card border border-border p-6 md:p-8">
+              <div className="text-center mb-6">
+                <div className="w-14 h-14 mx-auto mb-3 rounded-2xl gradient-saffron flex items-center justify-center shadow-warm">
+                  <Shield className="w-7 h-7 text-primary-foreground" />
+                </div>
+                <h2 className="text-2xl font-bold text-foreground">એડમિન પેનલ</h2>
+                <p className="text-muted-foreground text-sm mt-1">એડમિન ID અને પાસવર્ડ દાખલ કરો</p>
+              </div>
+              <form onSubmit={handleAdminLogin} className="space-y-4">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">એડમિન ID</label>
+                  <Input value={adminId} onChange={e => setAdminId(e.target.value)} placeholder="એડમિન ID દાખલ કરો" />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-foreground">પાસવર્ડ</label>
+                  <Input type="password" value={adminPass} onChange={e => setAdminPass(e.target.value)} placeholder="પાસવર્ડ દાખલ કરો" />
+                </div>
+                <Button type="submit" className="w-full gradient-saffron text-primary-foreground hover:opacity-90 h-12 text-lg font-semibold rounded-xl shadow-warm">
+                  લોગિન કરો
+                </Button>
+              </form>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   const filtered = registrations.filter((r) =>
     `${r.fullName} ${r.fatherName} ${r.surname} ${r.mobile} ${r.area}`.toLowerCase().includes(search.toLowerCase())
