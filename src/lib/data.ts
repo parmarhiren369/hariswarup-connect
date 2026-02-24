@@ -73,6 +73,7 @@ export const CITY_OPTIONS = [
   "Khodiyar Nagar",
   "Kishanwadi",
   "Laxmipura",
+  "Madhyasth City Vista",
   "Makarpura",
   "Mandvi",
   "Maneja",
