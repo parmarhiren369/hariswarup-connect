@@ -134,6 +134,19 @@ export async function getRegistrations(): Promise<MemberRegistration[]> {
   });
 }
 
+export async function getRegistrationById(id: string): Promise<MemberRegistration | null> {
+  const snapshot = await getDoc(doc(db, "registrations", id));
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  const data = snapshot.data() as Omit<MemberRegistration, "id"> & { id?: string };
+  return {
+    ...data,
+    id: data.id || snapshot.id,
+  };
+}
+
 export async function saveRegistration(reg: MemberRegistration): Promise<void> {
   await setDoc(doc(db, "registrations", reg.id), reg);
 }

@@ -15,14 +15,14 @@ import { Search, Trash2, Eye, Users, Download, UserPlus, Shield } from "lucide-r
 
 const ADMIN_ID = "suchetan swami";
 const ADMIN_PASS = "suchetanswami369";
+const ADMIN_SESSION_KEY = "admin_authenticated";
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [registrations, setRegistrations] = useState<MemberRegistration[]>([]);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<MemberRegistration | null>(null);
-  const [showSubMembers, setShowSubMembers] = useState<MemberRegistration | null>(null);
-  const [adminAuth, setAdminAuth] = useState(false);
+  const [adminAuth, setAdminAuth] = useState(() => sessionStorage.getItem(ADMIN_SESSION_KEY) === "true");
   const [adminId, setAdminId] = useState("");
   const [adminPass, setAdminPass] = useState("");
 
@@ -41,6 +41,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     if (adminId.trim().toLowerCase() === ADMIN_ID && adminPass === ADMIN_PASS) {
       setAdminAuth(true);
+      sessionStorage.setItem(ADMIN_SESSION_KEY, "true");
       toast.success("એડમિન લોગિન સફળ! 🙏");
     } else {
       toast.error("ખોટો ID અથવા પાસવર્ડ");
@@ -94,6 +95,10 @@ const AdminDashboard = () => {
     }
   };
 
+  const openSubMembersPage = (registrationId: string) => {
+    navigate(`/admin/member/${registrationId}/sub-members`);
+  };
+
   const exportCSV = () => {
     if (registrations.length === 0) {
       toast.error("એક્સપોર્ટ કરવા માટે કોઈ ડેટા નથી");
@@ -120,30 +125,6 @@ const AdminDashboard = () => {
     a.click();
     URL.revokeObjectURL(url);
     toast.success("CSV ડાઉનલોડ થયું");
-  };
-
-  const exportSubMembersCSV = () => {
-    const allSub: { parent: string; name: string; contact: string; area: string; profession: string }[] = [];
-    registrations.forEach((r) => {
-      (r.subMembers || []).forEach((s) => {
-        allSub.push({ parent: r.fullName, name: s.name, contact: s.contact, area: s.area, profession: s.profession });
-      });
-    });
-    if (allSub.length === 0) {
-      toast.error("કોઈ વધારાના સભ્યો નથી");
-      return;
-    }
-    const headers = ["મુખ્ય સભ્ય", "નામ", "સંપર્ક", "વિસ્તાર", "વ્યવસાય"];
-    const rows = allSub.map((s) => [s.parent, s.name, s.contact, s.area, s.profession]);
-    const csv = [headers.join(","), ...rows.map((r) => r.map((v) => `"${v}"`).join(","))].join("\n");
-    const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "sub_members.csv";
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success("વધારાના સભ્યો CSV ડાઉનલોડ થયું");
   };
 
   const totalSubMembers = registrations.reduce((acc, r) => acc + (r.subMembers?.length || 0), 0);
@@ -218,7 +199,7 @@ const AdminDashboard = () => {
                 </TableHeader>
                 <TableBody>
                   {filtered.map((r, i) => (
-                    <TableRow key={r.id} className="hover:bg-primary/5 transition-colors">
+                    <TableRow key={r.id} className="hover:bg-primary/5 transition-colors cursor-pointer" onClick={() => openSubMembersPage(r.id)}>
                       <TableCell className="text-muted-foreground">{i + 1}</TableCell>
                       <TableCell className="font-medium">{r.fullName}</TableCell>
                       <TableCell>{r.surname}</TableCell>
@@ -226,7 +207,10 @@ const AdminDashboard = () => {
                       <TableCell>{r.area || "—"}</TableCell>
                       <TableCell>
                         {r.subMembers && r.subMembers.length > 0 ? (
-                          <Button variant="link" size="sm" className="text-primary p-0 h-auto" onClick={() => setShowSubMembers(r)}>
+                          <Button variant="link" size="sm" className="text-primary p-0 h-auto" onClick={(e) => {
+                            e.stopPropagation();
+                            openSubMembersPage(r.id);
+                          }}>
                             {r.subMembers.length} સભ્યો
                           </Button>
                         ) : "—"}
@@ -235,7 +219,10 @@ const AdminDashboard = () => {
                         <div className="flex gap-1 justify-end">
                           <Dialog>
                             <DialogTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelected(r)}>
+                              <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => {
+                                e.stopPropagation();
+                                setSelected(r);
+                              }}>
                                 <Eye className="w-4 h-4" />
                               </Button>
                             </DialogTrigger>
@@ -258,7 +245,10 @@ const AdminDashboard = () => {
                               )}
                             </DialogContent>
                           </Dialog>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => void handleDelete(r.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={(e) => {
+                            e.stopPropagation();
+                            void handleDelete(r.id);
+                          }}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
@@ -271,82 +261,6 @@ const AdminDashboard = () => {
           )}
         </div>
 
-        {/* Sub Members Table */}
-        {totalSubMembers > 0 && (
-          <div className="bg-card rounded-xl shadow-card border border-border">
-            <div className="p-5 border-b border-border flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between">
-              <h2 className="text-lg font-semibold text-foreground">વધારાના સભ્યો યાદી</h2>
-              <Button variant="outline" size="sm" onClick={exportSubMembersCSV} className="gap-1.5">
-                <Download className="w-4 h-4" /> Excel/CSV
-              </Button>
-            </div>
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-foreground font-semibold">#</TableHead>
-                    <TableHead className="text-foreground font-semibold">મુખ્ય સભ્ય</TableHead>
-                    <TableHead className="text-foreground font-semibold">નામ</TableHead>
-                    <TableHead className="text-foreground font-semibold">સંપર્ક</TableHead>
-                    <TableHead className="text-foreground font-semibold">વિસ્તાર</TableHead>
-                    <TableHead className="text-foreground font-semibold">વ્યવસાય</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {(() => {
-                    let count = 0;
-                    return registrations.flatMap((r) =>
-                      (r.subMembers || []).map((s) => {
-                        count++;
-                        return (
-                          <TableRow key={`${r.id}-${count}`} className="hover:bg-primary/5 transition-colors">
-                            <TableCell className="text-muted-foreground">{count}</TableCell>
-                            <TableCell className="font-medium">{r.fullName}</TableCell>
-                            <TableCell>{s.name}</TableCell>
-                            <TableCell>{s.contact || "—"}</TableCell>
-                            <TableCell>{s.area || "—"}</TableCell>
-                            <TableCell>{s.profession || "—"}</TableCell>
-                          </TableRow>
-                        );
-                      })
-                    );
-                  })()}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-
-        {/* Sub Members Dialog */}
-        <Dialog open={!!showSubMembers} onOpenChange={(open) => !open && setShowSubMembers(null)}>
-          <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>{showSubMembers?.fullName} - વધારાના સભ્યો</DialogTitle>
-            </DialogHeader>
-            {showSubMembers?.subMembers && (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>નામ</TableHead>
-                    <TableHead>સંપર્ક</TableHead>
-                    <TableHead>વિસ્તાર</TableHead>
-                    <TableHead>વ્યવસાય</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {showSubMembers.subMembers.map((s, i) => (
-                    <TableRow key={i}>
-                      <TableCell className="font-medium">{s.name}</TableCell>
-                      <TableCell>{s.contact || "—"}</TableCell>
-                      <TableCell>{s.area || "—"}</TableCell>
-                      <TableCell>{s.profession || "—"}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
-          </DialogContent>
-        </Dialog>
       </main>
     </div>
   );
