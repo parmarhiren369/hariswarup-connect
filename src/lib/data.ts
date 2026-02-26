@@ -1,3 +1,6 @@
+import { collection, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, setDoc, type Unsubscribe } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+
 export interface SubMember {
   name: string;
   contact: string;
@@ -118,18 +121,45 @@ export const CITY_OPTIONS = [
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 
-export function getRegistrations(): MemberRegistration[] {
-  const data = localStorage.getItem("satsang_registrations");
-  return data ? JSON.parse(data) : [];
+export async function getRegistrations(): Promise<MemberRegistration[]> {
+  const q = query(collection(db, "registrations"), orderBy("registeredAt", "desc"));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map((d) => {
+    const data = d.data() as Omit<MemberRegistration, "id"> & { id?: string };
+    return {
+      ...data,
+      id: data.id || d.id,
+    };
+  });
 }
 
-export function saveRegistration(reg: MemberRegistration) {
-  const existing = getRegistrations();
-  existing.push(reg);
-  localStorage.setItem("satsang_registrations", JSON.stringify(existing));
+export async function saveRegistration(reg: MemberRegistration): Promise<void> {
+  await setDoc(doc(db, "registrations", reg.id), reg);
 }
 
-export function deleteRegistration(id: string) {
-  const existing = getRegistrations().filter((r) => r.id !== id);
-  localStorage.setItem("satsang_registrations", JSON.stringify(existing));
+export async function deleteRegistration(id: string): Promise<void> {
+  await deleteDoc(doc(db, "registrations", id));
+}
+
+export function listenRegistrations(
+  onData: (registrations: MemberRegistration[]) => void,
+  onError?: (error: unknown) => void,
+): Unsubscribe {
+  const q = query(collection(db, "registrations"), orderBy("registeredAt", "desc"));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const registrations = snapshot.docs.map((d) => {
+        const data = d.data() as Omit<MemberRegistration, "id"> & { id?: string };
+        return {
+          ...data,
+          id: data.id || d.id,
+        };
+      });
+      onData(registrations);
+    },
+    (error) => {
+      onError?.(error);
+    },
+  );
 }

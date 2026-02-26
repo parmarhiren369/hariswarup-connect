@@ -55,7 +55,7 @@ const RegistrationForm = () => {
     );
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const required = [
@@ -85,14 +85,18 @@ const RegistrationForm = () => {
       subMembers: validSubMembers.length > 0 ? validSubMembers : undefined,
     };
 
-    saveRegistration(reg);
-    toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
-    setForm({
-      fullName: "", fatherName: "", surname: "", birthDate: "",
-      maritalStatus: "", occupation: "", mobile: "", whatsapp: "",
-      area: "",
-    });
-    setSubMembers([]);
+    try {
+      await saveRegistration(reg);
+      toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
+      setForm({
+        fullName: "", fatherName: "", surname: "", birthDate: "",
+        maritalStatus: "", occupation: "", mobile: "", whatsapp: "",
+        area: "",
+      });
+      setSubMembers([]);
+    } catch {
+      toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, કૃપા કરીને ફરી પ્રયાસ કરો");
+    }
   };
 
   const SectionTitle = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (

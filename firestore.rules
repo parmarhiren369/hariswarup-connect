@@ -13,6 +13,10 @@ service cloud.firestore {
       allow read, create, update, delete: if isOwner(userId);
     }
 
+    match /registrations/{registrationId} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

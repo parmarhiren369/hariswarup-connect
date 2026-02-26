@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import AppHeader from "@/components/AppHeader";
-import { getRegistrations, deleteRegistration, type MemberRegistration } from "@/lib/data";
+import { listenRegistrations, deleteRegistration, type MemberRegistration } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,7 +27,14 @@ const AdminDashboard = () => {
   const [adminPass, setAdminPass] = useState("");
 
   useEffect(() => {
-    if (adminAuth) setRegistrations(getRegistrations());
+    if (!adminAuth) return;
+
+    const unsubscribe = listenRegistrations(
+      (data) => setRegistrations(data),
+      () => toast.error("ડેટા લોડ કરવામાં મુશ્કેલી આવી"),
+    );
+
+    return unsubscribe;
   }, [adminAuth]);
 
   const handleAdminLogin = (e: React.FormEvent) => {
@@ -78,10 +85,13 @@ const AdminDashboard = () => {
     `${r.fullName} ${r.fatherName} ${r.surname} ${r.mobile} ${r.area}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleDelete = (id: string) => {
-    deleteRegistration(id);
-    setRegistrations(getRegistrations());
-    toast.success("રેકોર્ડ કાઢી નાખ્યો");
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteRegistration(id);
+      toast.success("રેકોર્ડ કાઢી નાખ્યો");
+    } catch {
+      toast.error("રેકોર્ડ કાઢવામાં મુશ્કેલી આવી");
+    }
   };
 
   const exportCSV = () => {
@@ -248,7 +258,7 @@ const AdminDashboard = () => {
                               )}
                             </DialogContent>
                           </Dialog>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDelete(r.id)}>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => void handleDelete(r.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </div>
