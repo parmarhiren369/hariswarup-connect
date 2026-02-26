@@ -12,12 +12,16 @@ import {
   CITY_OPTIONS,
   getRegistrationByUserId,
   saveRegistrationForUser,
+  getUserRegistrationProfile,
+  saveUserRegistrationProfile,
   type MemberRegistration,
   type SubMember,
 } from "@/lib/data";
 import { User, Phone, MapPin, Heart, UserPlus, Trash2, Plus } from "lucide-react";
 
 const emptySubMember = (): SubMember => ({ name: "", contact: "", area: "", profession: "" });
+
+const getUserDraftKey = (uid: string) => `registration_draft_${uid}`;
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
@@ -38,6 +42,21 @@ const RegistrationForm = () => {
 
   const [subMembers, setSubMembers] = useState<SubMember[]>([]);
 
+  const applyRegistrationToForm = (existing: MemberRegistration) => {
+    setForm({
+      fullName: existing.fullName || "",
+      fatherName: existing.fatherName || "",
+      surname: existing.surname || "",
+      birthDate: existing.birthDate || "",
+      maritalStatus: existing.maritalStatus || "",
+      occupation: existing.occupation || "",
+      mobile: existing.mobile || "",
+      whatsapp: existing.whatsapp || "",
+      area: existing.area || "",
+    });
+    setSubMembers(existing.subMembers || []);
+  };
+
   useEffect(() => {
     const loadExistingData = async () => {
       if (!user?.uid) {
@@ -46,20 +65,24 @@ const RegistrationForm = () => {
       }
 
       try {
+        const profileRegistration = await getUserRegistrationProfile(user.uid);
+        if (profileRegistration) {
+          applyRegistrationToForm(profileRegistration);
+          localStorage.setItem(getUserDraftKey(user.uid), JSON.stringify(profileRegistration));
+          return;
+        }
+
         const existing = await getRegistrationByUserId(user.uid);
         if (existing) {
-          setForm({
-            fullName: existing.fullName || "",
-            fatherName: existing.fatherName || "",
-            surname: existing.surname || "",
-            birthDate: existing.birthDate || "",
-            maritalStatus: existing.maritalStatus || "",
-            occupation: existing.occupation || "",
-            mobile: existing.mobile || "",
-            whatsapp: existing.whatsapp || "",
-            area: existing.area || "",
-          });
-          setSubMembers(existing.subMembers || []);
+          applyRegistrationToForm(existing);
+          localStorage.setItem(getUserDraftKey(user.uid), JSON.stringify(existing));
+          return;
+        }
+
+        const rawDraft = localStorage.getItem(getUserDraftKey(user.uid));
+        if (rawDraft) {
+          const draft = JSON.parse(rawDraft) as MemberRegistration;
+          applyRegistrationToForm(draft);
         }
       } catch {
         toast.error("તમારો પહેલાનો ડેટા લોડ કરવામાં મુશ્કેલી આવી");
@@ -130,10 +153,22 @@ const RegistrationForm = () => {
     setSubmitting(true);
     try {
       const existing = await getRegistrationByUserId(user.uid);
-      await saveRegistrationForUser(user.uid, {
+      const payload = {
         ...reg,
+        userId: user.uid,
         registeredAt: existing?.registeredAt || reg.registeredAt,
-      });
+      };
+
+      await saveRegistrationForUser(user.uid, payload);
+      await saveUserRegistrationProfile(user.uid, payload);
+      localStorage.setItem(
+        getUserDraftKey(user.uid),
+        JSON.stringify({
+          ...payload,
+          id: user.uid,
+          userId: user.uid,
+        }),
+      );
       toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
     } catch {
       toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, કૃપા કરીને ફરી પ્રયાસ કરો");

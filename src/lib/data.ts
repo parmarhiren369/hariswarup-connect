@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, where, type Unsubscribe } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export interface SubMember {
@@ -10,6 +10,7 @@ export interface SubMember {
 
 export interface MemberRegistration {
   id: string;
+  userId?: string;
   fullName: string;
   fatherName: string;
   surname: string;
@@ -138,15 +139,26 @@ export async function saveRegistration(reg: MemberRegistration): Promise<void> {
 }
 
 export async function getRegistrationByUserId(userId: string): Promise<MemberRegistration | null> {
-  const snapshot = await getDoc(doc(db, "registrations", userId));
-  if (!snapshot.exists()) {
+  const byId = await getDoc(doc(db, "registrations", userId));
+  if (byId.exists()) {
+    const data = byId.data() as Omit<MemberRegistration, "id"> & { id?: string };
+    return {
+      ...data,
+      id: data.id || byId.id,
+    };
+  }
+
+  const q = query(collection(db, "registrations"), where("userId", "==", userId), limit(1));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) {
     return null;
   }
 
-  const data = snapshot.data() as Omit<MemberRegistration, "id"> & { id?: string };
+  const first = snapshot.docs[0];
+  const data = first.data() as Omit<MemberRegistration, "id"> & { id?: string };
   return {
     ...data,
-    id: data.id || snapshot.id,
+    id: data.id || first.id,
   };
 }
 
@@ -154,7 +166,43 @@ export async function saveRegistrationForUser(userId: string, reg: Omit<MemberRe
   await setDoc(doc(db, "registrations", userId), {
     ...reg,
     id: userId,
+    userId,
   });
+}
+
+export async function getUserRegistrationProfile(userId: string): Promise<MemberRegistration | null> {
+  const snapshot = await getDoc(doc(db, "users", userId));
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  const payload = snapshot.data() as {
+    registration?: Omit<MemberRegistration, "id"> & { id?: string };
+  };
+
+  if (!payload.registration) {
+    return null;
+  }
+
+  return {
+    ...payload.registration,
+    id: payload.registration.id || userId,
+    userId,
+  };
+}
+
+export async function saveUserRegistrationProfile(userId: string, reg: Omit<MemberRegistration, "id">): Promise<void> {
+  await setDoc(
+    doc(db, "users", userId),
+    {
+      registration: {
+        ...reg,
+        id: userId,
+        userId,
+      },
+    },
+    { merge: true },
+  );
 }
 
 export async function deleteRegistration(id: string): Promise<void> {
