@@ -19,6 +19,7 @@ const emptySubMember = (): SubMember => ({ name: "", contact: "", area: "", prof
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     fullName: "",
     fatherName: "",
@@ -57,6 +58,7 @@ const RegistrationForm = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submitting) return;
 
     const required = [
       "fullName", "fatherName", "surname", "birthDate",
@@ -85,6 +87,7 @@ const RegistrationForm = () => {
       subMembers: validSubMembers.length > 0 ? validSubMembers : undefined,
     };
 
+    setSubmitting(true);
     try {
       await saveRegistration(reg);
       toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
@@ -96,6 +99,8 @@ const RegistrationForm = () => {
       setSubMembers([]);
     } catch {
       toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, કૃપા કરીને ફરી પ્રયાસ કરો");
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -265,8 +270,8 @@ const RegistrationForm = () => {
             </div>
 
             <div className="pt-6">
-              <Button type="submit" className="w-full gradient-saffron text-primary-foreground hover:opacity-90 transition-opacity h-12 text-lg font-semibold rounded-xl shadow-warm">
-                સબમિટ કરો 🙏
+              <Button type="submit" disabled={submitting} className="w-full gradient-saffron text-primary-foreground hover:opacity-90 transition-opacity h-12 text-lg font-semibold rounded-xl shadow-warm">
+                {submitting ? "સેવ થઈ રહ્યું છે..." : "સબમિટ કરો 🙏"}
               </Button>
             </div>
           </form>
