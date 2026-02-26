@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import AppHeader from "@/components/AppHeader";
+import { useAuth } from "@/contexts/AuthContext";
 import {
   CITY_OPTIONS,
-  saveRegistration,
+  getRegistrationByUserId,
+  saveRegistrationForUser,
   type MemberRegistration,
   type SubMember,
 } from "@/lib/data";
@@ -19,7 +21,9 @@ const emptySubMember = (): SubMember => ({ name: "", contact: "", area: "", prof
 
 const RegistrationForm = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [submitting, setSubmitting] = useState(false);
+  const [loadingExisting, setLoadingExisting] = useState(true);
   const [form, setForm] = useState({
     fullName: "",
     fatherName: "",
@@ -33,6 +37,39 @@ const RegistrationForm = () => {
   });
 
   const [subMembers, setSubMembers] = useState<SubMember[]>([]);
+
+  useEffect(() => {
+    const loadExistingData = async () => {
+      if (!user?.uid) {
+        setLoadingExisting(false);
+        return;
+      }
+
+      try {
+        const existing = await getRegistrationByUserId(user.uid);
+        if (existing) {
+          setForm({
+            fullName: existing.fullName || "",
+            fatherName: existing.fatherName || "",
+            surname: existing.surname || "",
+            birthDate: existing.birthDate || "",
+            maritalStatus: existing.maritalStatus || "",
+            occupation: existing.occupation || "",
+            mobile: existing.mobile || "",
+            whatsapp: existing.whatsapp || "",
+            area: existing.area || "",
+          });
+          setSubMembers(existing.subMembers || []);
+        }
+      } catch {
+        toast.error("તમારો પહેલાનો ડેટા લોડ કરવામાં મુશ્કેલી આવી");
+      } finally {
+        setLoadingExisting(false);
+      }
+    };
+
+    void loadExistingData();
+  }, [user?.uid]);
 
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -59,6 +96,10 @@ const RegistrationForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (submitting) return;
+    if (!user?.uid) {
+      toast.error("કૃપા કરીને ફરીથી લોગિન કરો");
+      return;
+    }
 
     const required = [
       "fullName", "fatherName", "surname", "birthDate",
@@ -80,29 +121,37 @@ const RegistrationForm = () => {
     // Validate sub-members have at least name
     const validSubMembers = subMembers.filter((m) => m.name.trim());
 
-    const reg: MemberRegistration = {
+    const reg: Omit<MemberRegistration, "id"> = {
       ...form,
-      id: crypto.randomUUID(),
       registeredAt: new Date().toISOString(),
       subMembers: validSubMembers.length > 0 ? validSubMembers : undefined,
     };
 
     setSubmitting(true);
     try {
-      await saveRegistration(reg);
-      toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
-      setForm({
-        fullName: "", fatherName: "", surname: "", birthDate: "",
-        maritalStatus: "", occupation: "", mobile: "", whatsapp: "",
-        area: "",
+      const existing = await getRegistrationByUserId(user.uid);
+      await saveRegistrationForUser(user.uid, {
+        ...reg,
+        registeredAt: existing?.registeredAt || reg.registeredAt,
       });
-      setSubMembers([]);
+      toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
     } catch {
       toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, કૃપા કરીને ફરી પ્રયાસ કરો");
     } finally {
       setSubmitting(false);
     }
   };
+
+  if (loadingExisting) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center animate-fade-in">
+          <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-muted-foreground">ડેટા લોડ થઈ રહ્યું છે...</p>
+        </div>
+      </div>
+    );
+  }
 
   const SectionTitle = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
     <div className="flex items-center gap-2 mb-4 mt-6 first:mt-0">

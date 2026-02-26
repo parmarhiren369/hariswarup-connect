@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDocs, onSnapshot, orderBy, query, setDoc, type Unsubscribe } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, onSnapshot, orderBy, query, setDoc, type Unsubscribe } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export interface SubMember {
@@ -135,6 +135,26 @@ export async function getRegistrations(): Promise<MemberRegistration[]> {
 
 export async function saveRegistration(reg: MemberRegistration): Promise<void> {
   await setDoc(doc(db, "registrations", reg.id), reg);
+}
+
+export async function getRegistrationByUserId(userId: string): Promise<MemberRegistration | null> {
+  const snapshot = await getDoc(doc(db, "registrations", userId));
+  if (!snapshot.exists()) {
+    return null;
+  }
+
+  const data = snapshot.data() as Omit<MemberRegistration, "id"> & { id?: string };
+  return {
+    ...data,
+    id: data.id || snapshot.id,
+  };
+}
+
+export async function saveRegistrationForUser(userId: string, reg: Omit<MemberRegistration, "id">): Promise<void> {
+  await setDoc(doc(db, "registrations", userId), {
+    ...reg,
+    id: userId,
+  });
 }
 
 export async function deleteRegistration(id: string): Promise<void> {
