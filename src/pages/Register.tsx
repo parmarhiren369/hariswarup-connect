@@ -11,9 +11,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   CITY_OPTIONS,
   getRegistrationByUserId,
-  saveRegistrationForUser,
+  saveRegistrationAndProfileForUser,
   getUserRegistrationProfile,
-  saveUserRegistrationProfile,
   type MemberRegistration,
   type SubMember,
 } from "@/lib/data";
@@ -94,6 +93,22 @@ const RegistrationForm = () => {
     void loadExistingData();
   }, [user?.uid]);
 
+  useEffect(() => {
+    if (!user?.uid || loadingExisting) {
+      return;
+    }
+
+    const draft: MemberRegistration = {
+      ...form,
+      registeredAt: new Date().toISOString(),
+      ...(subMembers.length > 0 ? { subMembers } : {}),
+      id: user.uid,
+      userId: user.uid,
+    };
+
+    localStorage.setItem(getUserDraftKey(user.uid), JSON.stringify(draft));
+  }, [form, subMembers, user?.uid, loadingExisting]);
+
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
@@ -147,7 +162,7 @@ const RegistrationForm = () => {
     const reg: Omit<MemberRegistration, "id"> = {
       ...form,
       registeredAt: new Date().toISOString(),
-      subMembers: validSubMembers.length > 0 ? validSubMembers : undefined,
+      ...(validSubMembers.length > 0 ? { subMembers: validSubMembers } : {}),
     };
 
     setSubmitting(true);
@@ -159,8 +174,7 @@ const RegistrationForm = () => {
         registeredAt: existing?.registeredAt || reg.registeredAt,
       };
 
-      await saveRegistrationForUser(user.uid, payload);
-      await saveUserRegistrationProfile(user.uid, payload);
+      await saveRegistrationAndProfileForUser(user.uid, payload);
       localStorage.setItem(
         getUserDraftKey(user.uid),
         JSON.stringify({
@@ -171,7 +185,7 @@ const RegistrationForm = () => {
       );
       toast.success("નોંધણી સફળતાપૂર્વક થઈ! 🙏");
     } catch {
-      toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, કૃપા કરીને ફરી પ્રયાસ કરો");
+      toast.error("નોંધણી સેવ કરવામાં મુશ્કેલી આવી, ફરી પ્રયાસ કરો. તમારો ડેટા સુરક્ષિત છે.");
     } finally {
       setSubmitting(false);
     }

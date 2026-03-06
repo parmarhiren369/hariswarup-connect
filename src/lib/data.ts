@@ -1,4 +1,4 @@
-import { collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, where, type Unsubscribe } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDoc, getDocs, limit, onSnapshot, orderBy, query, setDoc, where, writeBatch, type Unsubscribe } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export interface SubMember {
@@ -22,6 +22,22 @@ export interface MemberRegistration {
   area: string;
   registeredAt: string;
   subMembers?: SubMember[];
+}
+
+type RegistrationPayload = Omit<MemberRegistration, "id">;
+
+function normalizeRegistrationPayload(userId: string, reg: RegistrationPayload): RegistrationPayload & { id: string; userId: string } {
+  const payload: RegistrationPayload & { id: string; userId: string } = {
+    ...reg,
+    id: userId,
+    userId,
+  };
+
+  if (!payload.subMembers || payload.subMembers.length === 0) {
+    delete payload.subMembers;
+  }
+
+  return payload;
 }
 
 export const CITY_OPTIONS = [
@@ -175,12 +191,8 @@ export async function getRegistrationByUserId(userId: string): Promise<MemberReg
   };
 }
 
-export async function saveRegistrationForUser(userId: string, reg: Omit<MemberRegistration, "id">): Promise<void> {
-  await setDoc(doc(db, "registrations", userId), {
-    ...reg,
-    id: userId,
-    userId,
-  });
+export async function saveRegistrationForUser(userId: string, reg: RegistrationPayload): Promise<void> {
+  await setDoc(doc(db, "registrations", userId), normalizeRegistrationPayload(userId, reg));
 }
 
 export async function getUserRegistrationProfile(userId: string): Promise<MemberRegistration | null> {
@@ -204,18 +216,30 @@ export async function getUserRegistrationProfile(userId: string): Promise<Member
   };
 }
 
-export async function saveUserRegistrationProfile(userId: string, reg: Omit<MemberRegistration, "id">): Promise<void> {
+export async function saveUserRegistrationProfile(userId: string, reg: RegistrationPayload): Promise<void> {
   await setDoc(
     doc(db, "users", userId),
     {
-      registration: {
-        ...reg,
-        id: userId,
-        userId,
-      },
+      registration: normalizeRegistrationPayload(userId, reg),
     },
     { merge: true },
   );
+}
+
+export async function saveRegistrationAndProfileForUser(userId: string, reg: RegistrationPayload): Promise<void> {
+  const normalized = normalizeRegistrationPayload(userId, reg);
+  const batch = writeBatch(db);
+
+  batch.set(doc(db, "registrations", userId), normalized);
+  batch.set(
+    doc(db, "users", userId),
+    {
+      registration: normalized,
+    },
+    { merge: true },
+  );
+
+  await batch.commit();
 }
 
 export async function deleteRegistration(id: string): Promise<void> {
